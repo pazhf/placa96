@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mapa de Placa 96</title>
+<style>:root{color-scheme:light}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: herramienta de laboratorio — placa física al centro, panel de tipos editable a la izquierda, resumen y tabla abajo */
+:root{
+  --bg:#f3f5f7; --surface:#ffffff; --plate:#e4e9ee; --plate-edge:#c9d2db;
+  --fg:#1b2530; --muted:#5d6b79; --line:#d5dde5; --accent:#1f6f8b; --danger:#c2412d;
+  --well-empty:#fbfcfd; --ink-on-accent:#ffffff;
+  --f-body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#11161b; --surface:#182028; --plate:#212c36; --plate-edge:#3a4855;
+  --fg:#e3e9ee; --muted:#93a2b0; --line:#2c3843; --accent:#5fb3d3; --danger:#ec7a66;
+  --well-empty:#141b21; --ink-on-accent:#0d1418; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#11161b; --surface:#182028; --plate:#212c36; --plate-edge:#3a4855;
+  --fg:#e3e9ee; --muted:#93a2b0; --line:#2c3843; --accent:#5fb3d3; --danger:#ec7a66;
+  --well-empty:#141b21; --ink-on-accent:#0d1418; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.45}
+.wrap{max-width:1220px;margin:0 auto;padding-inline:16px;padding-block:20px 40px;display:grid;gap:18px}
+header{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-end;justify-content:space-between}
+h1{font-size:1.5rem;margin:0;text-wrap:balance;letter-spacing:-.01em}
+.sub{color:var(--muted);margin:2px 0 0;font-size:.9rem;max-width:62ch}
+.meta{display:flex;flex-wrap:wrap;gap:10px}
+.meta label{display:grid;gap:2px;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+input,select{font:inherit;font-size:.92rem;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:6px 8px;min-width:0}
+input:focus-visible,select:focus-visible,button:focus-visible,.well:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.main{display:grid;grid-template-columns:290px minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:860px){.main{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;display:grid;gap:12px}
+.panel h2{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0}
+.panel-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.types{display:grid;gap:6px}
+@media (max-width:860px){.types{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}}
+.type{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;padding:5px 6px 5px 8px;cursor:pointer;background:var(--surface)}
+.type.on{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.type .pick{appearance:none;-webkit-appearance:none;width:24px;height:24px;border-radius:50%;border:1px solid var(--plate-edge);padding:0;cursor:pointer;background:none;overflow:hidden}
+.type .pick::-webkit-color-swatch-wrapper{padding:0}
+.type .pick::-webkit-color-swatch{border:0;border-radius:50%}
+.type .pick::-moz-color-swatch{border:0;border-radius:50%}
+.type .pick:disabled{cursor:default}
+.type .name{border:1px solid transparent;background:transparent;padding:4px 6px;font-size:.9rem;width:100%}
+.type .name:hover{border-color:var(--line)}
+.type .name:focus{border-color:var(--accent);background:var(--bg)}
+.type .name[readonly]{cursor:pointer}
+.count{font-family:var(--f-mono);font-size:.75rem;color:var(--muted);font-variant-numeric:tabular-nums;min-width:2ch;text-align:right}
+.del{border:0;background:none;color:var(--muted);cursor:pointer;font-size:1rem;line-height:1;padding:4px 6px;border-radius:5px}
+.del:hover{color:var(--danger);background:var(--bg)}
+.del[disabled]{visibility:hidden}
+.swatches{display:flex;flex-wrap:wrap;gap:6px}
+.swatches button{width:22px;height:22px;border-radius:50%;border:1px solid var(--plate-edge);cursor:pointer;padding:0}
+.field{display:grid;gap:4px;font-size:.8rem;color:var(--muted)}
+.hint{font-size:.8rem;color:var(--muted);margin:0}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+button.btn{font:inherit;font-size:.88rem;border-radius:7px;padding:7px 12px;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--fg)}
+button.btn.small{padding:4px 9px;font-size:.8rem}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--ink-on-accent)}
+button.danger{color:var(--danger);border-color:var(--danger)}
+.confirm{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:.85rem}
+.plate-scroll{overflow-x:auto;padding-bottom:4px}
+.plate{--w:44px;background:var(--plate);border:2px solid var(--plate-edge);border-radius:14px;padding:12px 14px 14px;width:max-content;
+  clip-path:polygon(18px 0,100% 0,100% 100%,0 100%,0 18px)}
+.grid{display:grid;grid-template-columns:22px repeat(12,var(--w));gap:5px;user-select:none;-webkit-user-select:none;touch-action:none}
+.hd{font-family:var(--f-mono);font-size:.72rem;color:var(--muted);display:grid;place-items:center;cursor:pointer;border-radius:4px;background:none;border:0;padding:0;height:22px}
+.hd.row{height:var(--w)}
+.hd:hover{color:var(--fg);background:var(--plate-edge)}
+.well{width:var(--w);height:var(--w);border-radius:50%;border:1.5px solid var(--plate-edge);background:var(--well-empty);display:grid;place-items:center;cursor:pointer;padding:0;font-family:var(--f-mono);font-size:.6rem;line-height:1.05;color:var(--fg);overflow:hidden;text-align:center;box-shadow:inset 0 2px 3px rgba(0,0,0,.08)}
+.well span{max-width:90%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
+@media (max-width:520px){.plate{--w:34px;padding:10px}.well{font-size:.5rem}}
+.legend-row{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.82rem;color:var(--muted);align-items:center}
+.legend-row b{color:var(--fg);font-family:var(--f-mono);font-weight:600}
+.legend-row i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px;border:1px solid var(--plate-edge)}
+.tbl-wrap{overflow-x:auto}
+table{border-collapse:collapse;font-size:.82rem;width:100%;font-variant-numeric:tabular-nums}
+th,td{border-bottom:1px solid var(--line);padding:5px 8px;text-align:left;white-space:nowrap}
+th{font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}
+td.mono{font-family:var(--f-mono)}
+details summary{cursor:pointer;font-weight:700;font-size:.92rem}
+.toast{font-size:.82rem;color:var(--accent);min-height:1.2em}
+.example{font-size:.78rem;color:var(--muted);border:1px dashed var(--line);border-radius:6px;padding:6px 9px;margin:0}
+@media (prefers-reduced-motion:no-preference){.well{transition:background-color .12s}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Mapa de placa de 96 pocillos</h1>
+      <p class="sub">8 filas (A–H) × 12 columnas (1–12). Elige un tipo y pinta pocillos con clic o arrastrando. Haz clic en el nombre de un tipo para renombrarlo y en su círculo para cambiar el color.</p>
+    </div>
+    <div class="meta">
+      <label for="m-name">Placa<input id="m-name" value="P01 — Viabilidad MTT 72 h"></label>
+      <label for="m-date">Fecha<input id="m-date" type="date"></label>
+      <label for="m-op">Operador/a<input id="m-op" placeholder="Iniciales" size="8"></label>
+    </div>
+  </header>
+
+  <div class="main">
+    <aside class="panel">
+      <div class="panel-head"><h2>Tipos de pocillo</h2><button class="btn small" id="addType">+ Agregar tipo</button></div>
+      <div class="types" id="types"></div>
+      <div class="field"><span>Paleta rápida (aplica al tipo seleccionado)</span><div class="swatches" id="swatches"></div></div>
+      <div class="field"><label for="lbl">Etiqueta al pintar (opcional)</label>
+        <input id="lbl" placeholder="ej. 10 µM, S3, Std 50"></div>
+      <label class="field" for="auto"><span>Etiqueta automática</span>
+        <select id="auto">
+          <option value="none">Ninguna</option>
+          <option value="num">Numerar en orden (1, 2, 3…)</option>
+        </select></label>
+      <p class="hint">Clic en la letra de una fila o el número de una columna para pintarla completa. “Vacío” borra pocillos. Al eliminar un tipo, sus pocillos quedan vacíos.</p>
+      <div class="actions">
+        <button class="btn primary" id="copy">Copiar CSV</button>
+        <button class="btn" id="copyGrid">Copiar como grilla</button>
+      </div>
+      <div class="actions" id="clearBox"></div>
+      <div class="toast" id="toast" role="status"></div>
+    </aside>
+
+    <section style="display:grid;gap:12px;min-width:0">
+      <p class="example" id="exNote">Ejemplo cargado: curva dosis-respuesta en triplicado, con bordes llenos de PBS para evitar el efecto borde. Bórralo con “Limpiar placa”.</p>
+      <div class="plate-scroll"><div class="plate"><div class="grid" id="grid"></div></div></div>
+      <div class="legend-row" id="summary"></div>
+      <details>
+        <summary>Tabla por pocillo</summary>
+        <div class="tbl-wrap"><table><thead><tr><th>Pocillo</th><th>Fila</th><th>Col</th><th>Tipo</th><th>Etiqueta</th></tr></thead><tbody id="tbody"></tbody></table></div>
+      </details>
+    </section>
+  </div>
+</div>
+
+<script>
+const ROWS="ABCDEFGH".split(""), COLS=[...Array(12)].map((_,i)=>i+1);
+const PALETTE=["#e3e7ea","#a8c5d9","#2f7fa8","#1d4e89","#d2553f","#f08a5d","#d9a43a","#f2d16b",
+  "#5b9a6b","#9ccf8a","#2a9d8f","#7fd1c7","#8e6bbf","#c9a6e8","#c4557f","#f2a6c2","#8a6a4f","#cfd6dc","#5d6b79","#2b2f36"];
+const DEFAULT_TYPES=[
+  {id:"blank",name:"Blanco (medio)",color:"#e3e7ea"},
+  {id:"veh",name:"Control vehículo",color:"#a8c5d9"},
+  {id:"dose",name:"Tratamiento / dosis",color:"#2f7fa8"},
+  {id:"pos",name:"Control positivo",color:"#d2553f"},
+  {id:"std",name:"Estándar / curva",color:"#d9a43a"},
+  {id:"sample",name:"Muestra",color:"#5b9a6b"},
+  {id:"edge",name:"PBS / borde",color:"#cfd6dc"},
+];
+const KEY="placa96-v2";
+let types=JSON.parse(JSON.stringify(DEFAULT_TYPES));
+let state={}; // pocillo -> {t,l}
+let cur="dose", painting=false, autoN=1, lastId=null, isExample=true;
+
+const $=id=>document.getElementById(id);
+const typeById=id=>types.find(t=>t.id===id);
+function esc(s){return String(s).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));}
+function inkFor(hex){const n=parseInt(hex.slice(1),16),r=n>>16&255,g=n>>8&255,b=n&255;
+  const L=x=>{x/=255;return x<=.03928?x/12.92:Math.pow((x+.055)/1.055,2.4)};
+  return (0.2126*L(r)+0.7152*L(g)+0.0722*L(b))>0.36?"#1b2530":"#ffffff";}
+
+function example(){
+  const s={};
+  ROWS.forEach(r=>COLS.forEach(c=>{if(r==="A"||r==="H"||c===1||c===12)s[r+c]={t:"edge",l:"PBS"};}));
+  const conc=["100","30","10","3","1","0.3","0.1"];
+  ["B","C","D","E","F","G"].forEach((r,i)=>{
+    const cmp=i<3?"A":"B";
+    s[r+2]={t:"blank",l:"Medio"};
+    s[r+3]={t:"veh",l:"DMSO"};
+    conc.forEach((x,k)=>s[r+(4+k)]={t:"dose",l:cmp+" "+x});
+    s[r+11]={t:"pos",l:"Ctrl+"};
+  });
+  return s;
+}
+function load(){
+  try{const raw=localStorage.getItem(KEY);
+    if(raw){const d=JSON.parse(raw);
+      if(Array.isArray(d.types)&&d.types.length)types=d.types;
+      state=d.state||{}; isExample=!!d.example;
+      ["m-name","m-date","m-op"].forEach(id=>{if(d[id]!=null)$(id).value=d[id];});
+      if(!typeById(cur))cur=types[0]?types[0].id:"empty";
+      return;}}catch(e){}
+  state=example(); isExample=true;
+  $("m-date").value=new Date().toISOString().slice(0,10);
+}
+function save(){try{localStorage.setItem(KEY,JSON.stringify({types,state,example:isExample,
+  "m-name":$("m-name").value,"m-date":$("m-date").value,"m-op":$("m-op").value}));}catch(e){}}
+
+/* ---------- Panel de tipos ---------- */
+function renderTypes(){
+  const box=$("types"); box.innerHTML="";
+  const all=[{id:"empty",name:"Vacío",color:null},...types];
+  all.forEach(t=>{
+    const row=document.createElement("div");
+    row.className="type"+(t.id===cur?" on":""); row.dataset.id=t.id;
+    const empty=t.id==="empty";
+    row.innerHTML=
+      `<input type="color" class="pick" id="c-${t.id}" aria-label="Color de ${esc(t.name)}" value="${empty?"#fbfcfd":t.color}" ${empty?"disabled":""}>`+
+      `<input class="name" id="n-${t.id}" aria-label="Nombre del tipo" value="${esc(t.name)}" ${empty?"readonly":""}>`+
+      `<span class="count" data-count="${t.id}">0</span>`+
+      `<button class="del" title="Eliminar tipo" aria-label="Eliminar ${esc(t.name)}" ${empty?"disabled":""}>×</button>`;
+    if(empty){row.querySelector(".pick").style.background="var(--well-empty)";}
+    row.addEventListener("click",e=>{ if(e.target.closest(".del"))return; select(t.id); });
+    if(!empty){
+      const pick=row.querySelector(".pick"), name=row.querySelector(".name");
+      pick.addEventListener("input",()=>{t.color=pick.value;renderPlate();save();});
+      name.addEventListener("input",()=>{t.name=name.value;renderPlate();save();});
+      name.addEventListener("blur",()=>{if(!t.name.trim()){t.name="Sin nombre";name.value=t.name;renderPlate();save();}});
+      row.querySelector(".del").addEventListener("click",()=>removeType(t.id,row));
+    }
+    box.appendChild(row);
+  });
+  updateCounts();
+}
+function select(id){cur=id;document.querySelectorAll(".type").forEach(r=>r.classList.toggle("on",r.dataset.id===cur));}
+function removeType(id,row){
+  const t=typeById(id), n=Object.values(state).filter(s=>s.t===id).length;
+  const doIt=()=>{types=types.filter(x=>x.id!==id);
+    Object.keys(state).forEach(k=>{if(state[k].t===id)delete state[k];});
+    if(cur===id)cur="empty"; isExample=false; $("exNote").hidden=true;
+    renderTypes();renderPlate();save();toast(`Tipo “${t.name}” eliminado.`);};
+  if(!n){doIt();return;}
+  // confirmación en línea
+  const holder=document.createElement("div");holder.className="confirm";
+  holder.innerHTML=`<span>¿Eliminar “${esc(t.name)}” y vaciar ${n} pocillo${n>1?"s":""}?</span><button class="btn small danger">Eliminar</button><button class="btn small">Cancelar</button>`;
+  row.after(holder);
+  const [yes,no]=holder.querySelectorAll("button");
+  yes.onclick=doIt; no.onclick=()=>holder.remove();
+}
+$("addType").onclick=()=>{
+  const used=new Set(types.map(t=>t.color.toLowerCase()));
+  const color=PALETTE.find(c=>!used.has(c))||"#"+Math.floor(Math.random()*0xffffff).toString(16).padStart(6,"0");
+  const id="t"+Date.now().toString(36);
+  types.push({id,name:"Nuevo tipo "+(types.length+1),color});
+  cur=id; renderTypes(); save();
+  const inp=$("n-"+id); inp.focus(); inp.select();
+};
+function renderSwatches(){
+  const box=$("swatches");
+  PALETTE.forEach(c=>{const b=document.createElement("button");b.style.background=c;b.title=c;b.setAttribute("aria-label","Usar color "+c);
+    b.onclick=()=>{const t=typeById(cur);if(!t){toast("Selecciona primero un tipo (no “Vacío”).");return;}
+      t.color=c;$("c-"+t.id).value=c;renderPlate();save();};
+    box.appendChild(b);});
+}
+
+/* ---------- Placa ---------- */
+const grid=$("grid");
+function build(){
+  grid.innerHTML="";
+  grid.appendChild(document.createElement("div"));
+  COLS.forEach(c=>{const b=document.createElement("button");b.className="hd";b.textContent=c;b.title="Pintar columna "+c;
+    b.onclick=()=>{ROWS.forEach(r=>paint(r+c));commit();};grid.appendChild(b);});
+  ROWS.forEach(r=>{
+    const b=document.createElement("button");b.className="hd row";b.textContent=r;b.title="Pintar fila "+r;
+    b.onclick=()=>{COLS.forEach(c=>paint(r+c));commit();};grid.appendChild(b);
+    COLS.forEach(c=>{const w=document.createElement("button");w.className="well";w.dataset.id=r+c;w.setAttribute("aria-label","Pocillo "+r+c);grid.appendChild(w);});
+  });
+}
+function paint(id){
+  if(painting&&id===lastId)return; lastId=id;
+  if(cur==="empty"){delete state[id];return;}
+  let l=$("lbl").value.trim();
+  if($("auto").value==="num")l=(l?l+" ":"")+(autoN++);
+  state[id]={t:cur,l};
+}
+function commit(){isExample=false;$("exNote").hidden=true;renderPlate();save();}
+function renderPlate(){
+  grid.querySelectorAll(".well").forEach(w=>{
+    const s=state[w.dataset.id], t=s&&typeById(s.t);
+    if(t){w.style.background=t.color;w.style.color=inkFor(t.color);}
+    else{w.style.background="";w.style.color="";}
+    w.innerHTML=s&&s.l?`<span>${esc(s.l)}</span>`:"";
+    w.title=w.dataset.id+(t?` · ${t.name}${s.l?" · "+s.l:""}`:" · vacío");
+  });
+  updateCounts();
+  $("tbody").innerHTML=rowsOut().map(r=>`<tr><td class="mono">${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${esc(r[3])}</td><td>${esc(r[4])}</td></tr>`).join("");
+}
+function updateCounts(){
+  const counts={};Object.values(state).forEach(s=>counts[s.t]=(counts[s.t]||0)+1);
+  const filled=Object.keys(state).length; counts.empty=96-filled;
+  document.querySelectorAll("[data-count]").forEach(el=>el.textContent=counts[el.dataset.count]||0);
+  $("summary").innerHTML=`<span><b>${filled}</b> de 96 pocillos asignados</span>`+
+    types.filter(t=>counts[t.id]).map(t=>`<span><i style="background:${t.color}"></i>${esc(t.name)}: <b>${counts[t.id]}</b></span>`).join("");
+}
+function rowsOut(){const out=[];ROWS.forEach(r=>COLS.forEach(c=>{const s=state[r+c],t=s&&typeById(s.t);
+  out.push([r+c,r,c,t?t.name:"Vacío",s?s.l:""]);}));return out;}
+
+grid.addEventListener("pointerdown",e=>{const w=e.target.closest(".well");if(!w)return;painting=true;lastId=null;paint(w.dataset.id);renderPlate();e.preventDefault();});
+grid.addEventListener("pointermove",e=>{if(!painting)return;const el=document.elementFromPoint(e.clientX,e.clientY);const w=el&&el.closest(".well");
+  if(w&&w.dataset.id!==lastId){paint(w.dataset.id);renderPlate();}});
+window.addEventListener("pointerup",()=>{if(painting){painting=false;lastId=null;commit();}});
+grid.addEventListener("keydown",e=>{const w=e.target.closest(".well");if(w&&(e.key==="Enter"||e.key===" ")){e.preventDefault();paint(w.dataset.id);commit();}});
+$("auto").onchange=()=>{autoN=1;};
+$("lbl").oninput=()=>{autoN=1;};
+
+/* ---------- Exportar / limpiar ---------- */
+function toast(m){const t=$("toast");t.textContent=m;clearTimeout(toast._t);toast._t=setTimeout(()=>t.textContent="",2800);}
+async function copyText(txt,msg){try{await navigator.clipboard.writeText(txt);toast(msg);}catch(e){
+  const ta=document.createElement("textarea");ta.value=txt;document.body.appendChild(ta);ta.select();
+  try{document.execCommand("copy");toast(msg);}catch(_){toast("No se pudo copiar. Abre la tabla y selecciónala a mano.");}ta.remove();}}
+const csvCell=x=>/[,"\n]/.test(String(x))?`"${String(x).replace(/"/g,'""')}"`:x;
+$("copy").onclick=()=>{
+  const head=`# ${$("m-name").value} | ${$("m-date").value} | ${$("m-op").value}`;
+  const csv=[head,"pocillo,fila,columna,tipo,etiqueta",...rowsOut().map(r=>r.map(csvCell).join(","))].join("\n");
+  copyText(csv,"CSV copiado (96 filas). Pégalo en Excel o Sheets.");};
+$("copyGrid").onclick=()=>{
+  const lines=["\t"+COLS.join("\t"),...ROWS.map(r=>r+"\t"+COLS.map(c=>{const s=state[r+c],t=s&&typeById(s.t);return s?(s.l||(t?t.name:"")):"";}).join("\t"))];
+  copyText(lines.join("\n"),"Grilla 8×12 copiada. Pégala en una hoja de cálculo.");};
+function clearIdle(){$("clearBox").innerHTML=`<button class="btn danger" id="clear">Limpiar placa</button><button class="btn" id="resetTypes">Restaurar tipos</button>`;
+  $("clear").onclick=()=>ask("¿Borrar los 96 pocillos?","Sí, borrar",()=>{state={};commit();toast("Placa vacía.");});
+  $("resetTypes").onclick=()=>ask("¿Volver a los 7 tipos originales? Los pocillos de tipos nuevos quedarán vacíos.","Restaurar",()=>{
+    types=JSON.parse(JSON.stringify(DEFAULT_TYPES));
+    Object.keys(state).forEach(k=>{if(!typeById(state[k].t))delete state[k];});
+    if(!typeById(cur))cur="dose";renderTypes();commit();toast("Tipos restaurados.");});}
+function ask(q,ok,fn){$("clearBox").innerHTML=`<div class="confirm">${q} <button class="btn danger" id="yes">${ok}</button><button class="btn" id="no">Cancelar</button></div>`;
+  $("yes").onclick=()=>{fn();clearIdle();}; $("no").onclick=clearIdle;}
+["m-name","m-date","m-op"].forEach(id=>$(id).addEventListener("input",save));
+
+build();load();$("exNote").hidden=!isExample;renderSwatches();renderTypes();renderPlate();clearIdle();
+</script>
+
+</body>
+</html>
